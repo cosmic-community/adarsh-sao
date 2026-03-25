@@ -5,6 +5,30 @@ interface ExperienceSectionProps {
   experiences: WorkExperience[];
 }
 
+// Changed: Normalize metrics to array for safe rendering
+function normalizeMetrics(metrics: unknown): string[] {
+  if (Array.isArray(metrics)) {
+    return metrics
+      .map((item) => {
+        if (typeof item === 'string') return item.trim();
+        if (typeof item === 'object' && item !== null && 'value' in item && 'label' in item) {
+          const value = String((item as { value?: unknown }).value ?? '').trim();
+          const label = String((item as { label?: unknown }).label ?? '').trim();
+          return [value, label].filter(Boolean).join(' ').trim();
+        }
+        return '';
+      })
+      .filter((item) => item.length > 0);
+  }
+  if (typeof metrics === 'string') {
+    return metrics
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+  return [];
+}
+
 export default function ExperienceSection({ experiences }: ExperienceSectionProps) {
   const fallbackExperiences = [
     {
@@ -15,7 +39,14 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
       isCurrent: true,
       description:
         'Managed end-to-end Meta Ads and Google Search campaigns for real estate and business consulting clients — covering keyword strategy, negative keyword pruning, match type optimisation, A/B creative testing, and multi-tier audience segmentation.',
-      metrics: '₹460 CPL, 20 Leads, 0.90% CTR, 1.37M Impressions, Pos. 19 Avg. Keyword Rank, ₹2 Cr Revenue Influenced',
+      metrics: [
+        '₹460 CPL',
+        '20 Leads',
+        '0.90% CTR',
+        '1.37M Impressions',
+        'Pos. 19 Avg. Keyword Rank',
+        '₹2 Cr Revenue Influenced',
+      ],
     },
     {
       title: 'Digital Marketing Executive · Intern',
@@ -25,7 +56,7 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
       isCurrent: false,
       description:
         'Assisted in setting up and managing Meta and Google Ads campaigns, building proficiency in audience targeting, ad creation, and budget management across live client accounts.',
-      metrics: 'Promoted to full-time in 3 months',
+      metrics: ['Promoted to full-time in 3 months'],
     },
     {
       title: 'Digital Marketing Intern',
@@ -35,7 +66,7 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
       isCurrent: false,
       description:
         'Executed Meta Ads campaigns across 3+ industry verticals — retail, services, and lifestyle — managing custom audiences, lookalike audiences, and creative variations.',
-      metrics: '',
+      metrics: [],
     },
   ];
 
@@ -48,10 +79,10 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
           dateRange: exp.metadata?.date_range || '',
           isCurrent: Boolean(
             exp.metadata?.current_role === true ||
-            getMetafieldValue(exp.metadata?.current_role) === 'true'
+              getMetafieldValue(exp.metadata?.current_role) === 'true'
           ),
           description: exp.metadata?.description || '',
-          metrics: exp.metadata?.key_metrics || '',
+          metrics: normalizeMetrics(exp.metadata?.key_metrics),
         }))
       : fallbackExperiences;
 
@@ -111,20 +142,16 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
                       {exp.description}
                     </p>
 
-                    {exp.metrics && (
+                    {exp.metrics.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {exp.metrics
-                          .split(',')
-                          .map((m: string) => m.trim())
-                          .filter((m: string) => m.length > 0)
-                          .map((metric: string, j: number) => (
-                            <span
-                              key={j}
-                              className="text-xs bg-emerald-500/10 text-emerald-300 px-2.5 py-1 rounded-lg font-medium"
-                            >
-                              {metric}
-                            </span>
-                          ))}
+                        {exp.metrics.map((metric, j) => (
+                          <span
+                            key={j}
+                            className="text-xs bg-emerald-500/10 text-emerald-300 px-2.5 py-1 rounded-lg font-medium"
+                          >
+                            {metric}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>

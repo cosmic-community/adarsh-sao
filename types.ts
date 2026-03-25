@@ -36,6 +36,7 @@ export interface SiteSettings extends CosmicObject {
   };
 }
 
+// Changed: tools_used and outcomes match Cosmic array structures
 export interface CaseStudy extends CosmicObject {
   type: 'case-studies';
   metadata: {
@@ -43,8 +44,8 @@ export interface CaseStudy extends CosmicObject {
     industry?: string;
     objective?: string;
     strategy?: string;
-    tools_used?: string;
-    outcomes?: string;
+    tools_used?: string[] | string;
+    outcomes?: Array<{ value: string; label: string }> | string;
     featured_image?: {
       url: string;
       imgix_url: string;
@@ -54,16 +55,18 @@ export interface CaseStudy extends CosmicObject {
   };
 }
 
+// Changed: skill_items is an array in Cosmic
 export interface Skill extends CosmicObject {
   type: 'skills';
   metadata: {
     category_name?: string;
-    skill_items?: string;
+    skill_items?: string[] | string;
     icon_emoji?: string;
     order?: number;
   };
 }
 
+// Changed: key_metrics is a JSON array in Cosmic
 export interface WorkExperience extends CosmicObject {
   type: 'work-experience';
   metadata: {
@@ -73,7 +76,7 @@ export interface WorkExperience extends CosmicObject {
     date_range?: string;
     current_role?: boolean | string;
     description?: string;
-    key_metrics?: string;
+    key_metrics?: Array<{ value: string; label: string }> | string;
     order?: number;
   };
 }

@@ -4,6 +4,44 @@ interface CaseStudiesSectionProps {
   caseStudies: CaseStudy[];
 }
 
+// Changed: Normalize tools/outcomes to arrays to avoid split() on non-strings
+function normalizeTools(tools: unknown): string[] {
+  if (Array.isArray(tools)) {
+    return tools.map((tool) => String(tool).trim()).filter((tool) => tool.length > 0);
+  }
+  if (typeof tools === 'string') {
+    return tools
+      .split(',')
+      .map((tool) => tool.trim())
+      .filter((tool) => tool.length > 0);
+  }
+  return [];
+}
+
+// Changed: Support outcomes as array of { value, label } or string
+function normalizeOutcomes(outcomes: unknown): string[] {
+  if (Array.isArray(outcomes)) {
+    return outcomes
+      .map((item) => {
+        if (typeof item === 'string') return item.trim();
+        if (typeof item === 'object' && item !== null && 'value' in item && 'label' in item) {
+          const value = String((item as { value?: unknown }).value ?? '').trim();
+          const label = String((item as { label?: unknown }).label ?? '').trim();
+          return [value, label].filter(Boolean).join(' ').trim();
+        }
+        return '';
+      })
+      .filter((item) => item.length > 0);
+  }
+  if (typeof outcomes === 'string') {
+    return outcomes
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+  return [];
+}
+
 export default function CaseStudiesSection({
   caseStudies,
 }: CaseStudiesSectionProps) {
@@ -16,9 +54,8 @@ export default function CaseStudiesSection({
         'Generate high-quality property enquiries for a premium residential project in Hyderabad. The goal was to reach serious buyers — not just clicks — while keeping cost per lead sustainable within a controlled monthly budget.',
       strategy:
         'Built a full-funnel Meta Ads campaign with layered audience segmentation: interest-based cold audiences, lookalike audiences from existing buyer data, and retargeting for warm traffic. Ran A/B tests on creative formats and implemented UTM tracking and GA4 event goals.',
-      tools: 'Meta Ads, GA4, GTM, Meta Pixel, Canva',
-      outcomes:
-        '₹9,200 Total Ad Spend (Feb 2026), 20 Leads Qualified Form Submissions, ₹2 Cr Flat Booking from 1 Lead',
+      tools: ['Meta Ads', 'GA4', 'GTM', 'Meta Pixel', 'Canva'],
+      outcomes: ['₹9,200 Total Ad Spend (Feb 2026)', '20 Leads Qualified Form Submissions', '₹2 Cr Flat Booking from 1 Lead'],
       slug: 'ambience-beaumonde',
       featuredImage: null as string | null,
       liveUrl: '',
@@ -31,9 +68,8 @@ export default function CaseStudiesSection({
         'Establish organic search presence for a B2B consulting firm in a highly competitive Hyderabad market. The client needed to rank for commercial-intent keywords attracting SMEs and family businesses seeking growth consultants.',
       strategy:
         'Conducted a thorough SERP gap analysis using Ahrefs and Google Search Console. Executed on-page optimisation across core service pages, restructured internal linking, and produced a 10+ blog series targeting commercial queries.',
-      tools: 'Ahrefs, Google Search Console, GA4, Google Ads, GTM',
-      outcomes:
-        'Pos. 19 Avg. Keyword Position (from 32), 9/20 Target Keywords Ranked, 10+ SEO Blogs Published',
+      tools: ['Ahrefs', 'Google Search Console', 'GA4', 'Google Ads', 'GTM'],
+      outcomes: ['Pos. 19 Avg. Keyword Position (from 32)', '9/20 Target Keywords Ranked', '10+ SEO Blogs Published'],
       slug: 'bridgegap-consulting',
       featuredImage: null as string | null,
       liveUrl: '',
@@ -48,8 +84,8 @@ export default function CaseStudiesSection({
           industry: cs.metadata?.industry || '',
           objective: cs.metadata?.objective || '',
           strategy: cs.metadata?.strategy || '',
-          tools: cs.metadata?.tools_used || '',
-          outcomes: cs.metadata?.outcomes || '',
+          tools: normalizeTools(cs.metadata?.tools_used),
+          outcomes: normalizeOutcomes(cs.metadata?.outcomes),
           slug: cs.slug,
           featuredImage: cs.metadata?.featured_image?.imgix_url || null,
           liveUrl: cs.metadata?.live_url || '',
@@ -124,18 +160,14 @@ export default function CaseStudiesSection({
                       Tools Used
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {study.tools
-                        .split(',')
-                        .map((t: string) => t.trim())
-                        .filter((t: string) => t.length > 0)
-                        .map((tool: string, j: number) => (
-                          <span
-                            key={j}
-                            className="text-xs bg-dark-800 text-dark-200 px-3 py-1.5 rounded-lg font-medium"
-                          >
-                            {tool}
-                          </span>
-                        ))}
+                      {study.tools.map((tool, j) => (
+                        <span
+                          key={j}
+                          className="text-xs bg-dark-800 text-dark-200 px-3 py-1.5 rounded-lg font-medium"
+                        >
+                          {tool}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
@@ -145,20 +177,16 @@ export default function CaseStudiesSection({
                       Outcomes
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {study.outcomes
-                        .split(',')
-                        .map((o: string) => o.trim())
-                        .filter((o: string) => o.length > 0)
-                        .map((outcome: string, j: number) => (
-                          <div
-                            key={j}
-                            className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 text-center"
-                          >
-                            <p className="text-sm text-emerald-300 font-semibold">
-                              {outcome}
-                            </p>
-                          </div>
-                        ))}
+                      {study.outcomes.map((outcome, j) => (
+                        <div
+                          key={j}
+                          className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 text-center"
+                        >
+                          <p className="text-sm text-emerald-300 font-semibold">
+                            {outcome}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
 

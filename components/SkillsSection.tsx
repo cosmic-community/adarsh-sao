@@ -4,37 +4,92 @@ interface SkillsSectionProps {
   skills: Skill[];
 }
 
+// Changed: Normalize skills list to array to avoid split() on non-strings
+function normalizeSkillItems(items: unknown): string[] {
+  if (Array.isArray(items)) {
+    return items.map((item) => String(item).trim()).filter((item) => item.length > 0);
+  }
+  if (typeof items === 'string') {
+    return items
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+  return [];
+}
+
 export default function SkillsSection({ skills }: SkillsSectionProps) {
   const fallbackSkills = [
     {
       emoji: '📱',
       category: 'Paid Social — Meta Ads',
-      items: 'Campaign Budget Optimisation, Custom Audiences, Lookalike Audiences, Retargeting, A/B Creative Testing, Lead Gen Forms',
+      items: [
+        'Campaign Budget Optimisation',
+        'Custom Audiences',
+        'Lookalike Audiences',
+        'Retargeting',
+        'A/B Creative Testing',
+        'Lead Gen Forms',
+      ],
     },
     {
       emoji: '🔍',
       category: 'Paid Search — Google Ads',
-      items: 'Search Campaigns, Keyword Strategy, Negative Keyword Pruning, Match Type Optimisation, Conversion Tracking, Quality Score',
+      items: [
+        'Search Campaigns',
+        'Keyword Strategy',
+        'Negative Keyword Pruning',
+        'Match Type Optimisation',
+        'Conversion Tracking',
+        'Quality Score',
+      ],
     },
     {
       emoji: '📊',
       category: 'SEO Strategy',
-      items: 'Keyword Research, On-Page Optimisation, SERP Analysis, Internal Linking, SEO Content Writing, Ahrefs',
+      items: [
+        'Keyword Research',
+        'On-Page Optimisation',
+        'SERP Analysis',
+        'Internal Linking',
+        'SEO Content Writing',
+        'Ahrefs',
+      ],
     },
     {
       emoji: '📈',
       category: 'Analytics & Tracking',
-      items: 'GA4, Google Tag Manager, Google Search Console, UTM Tracking, Performance Reporting, Funnel Analysis',
+      items: [
+        'GA4',
+        'Google Tag Manager',
+        'Google Search Console',
+        'UTM Tracking',
+        'Performance Reporting',
+        'Funnel Analysis',
+      ],
     },
     {
       emoji: '✍️',
       category: 'Content & Strategy',
-      items: 'SEO Blog Writing, Content Calendars, Campaign Copywriting, High-Intent Content, Brand Messaging',
+      items: [
+        'SEO Blog Writing',
+        'Content Calendars',
+        'Campaign Copywriting',
+        'High-Intent Content',
+        'Brand Messaging',
+      ],
     },
     {
       emoji: '🛠️',
       category: 'Tools & Platforms',
-      items: 'Meta Business Suite, Google Ads Manager, HubSpot, Canva, Notion, Google Workspace',
+      items: [
+        'Meta Business Suite',
+        'Google Ads Manager',
+        'HubSpot',
+        'Canva',
+        'Notion',
+        'Google Workspace',
+      ],
     },
   ];
 
@@ -43,7 +98,7 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
       ? skills.map((s) => ({
           emoji: s.metadata?.icon_emoji || '🛠️',
           category: s.metadata?.category_name || s.title,
-          items: s.metadata?.skill_items || '',
+          items: normalizeSkillItems(s.metadata?.skill_items),
         }))
       : fallbackSkills;
 
@@ -70,18 +125,14 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
                 {skill.category}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {skill.items
-                  .split(',')
-                  .map((item: string) => item.trim())
-                  .filter((item: string) => item.length > 0)
-                  .map((item: string, j: number) => (
-                    <span
-                      key={j}
-                      className="text-xs bg-dark-800 text-dark-300 px-2.5 py-1 rounded-lg"
-                    >
-                      {item}
-                    </span>
-                  ))}
+                {skill.items.map((item, j) => (
+                  <span
+                    key={j}
+                    className="text-xs bg-dark-800 text-dark-300 px-2.5 py-1 rounded-lg"
+                  >
+                    {item}
+                  </span>
+                ))}
               </div>
             </div>
           ))}
